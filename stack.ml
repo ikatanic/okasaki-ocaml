@@ -75,6 +75,7 @@ module CustomStack : STACK =
 end
 
 
+(* Exercise 2.1 *)
 let rec suffixes xs =
   if List.isEmpty xs then List.empty
   else List.cons (List.head xs) (suffixes (List.tail xs))

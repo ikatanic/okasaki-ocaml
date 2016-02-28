@@ -122,7 +122,7 @@ module WeightBiasedHeap (Element:ORDERED) : (HEAP with module Elem = Element) =
       | T (_, _, a, b) -> merge a b
 
     (* Exercise 3.4c *)
-    let rec merge h1 h2 =
+    let rec merge2 h1 h2 =
       match h1, h2 with
       | E, h -> h
       | h, E -> h

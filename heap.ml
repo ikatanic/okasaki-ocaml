@@ -1,11 +1,11 @@
+exception Empty
+
 module type ORDERED = 
   (* a totally ordered type and it's comparison function *)
   sig
     type t
     val compare : t -> t -> int
   end
-
-exception Empty
 
 module type HEAP =
   sig
@@ -22,6 +22,46 @@ module type HEAP =
     val findMin : heap -> Elem.t (* raises Empty if heap is empty *)
     val deleteMin : heap -> heap (* raises Empty if heap is empty *)
   end
+
+
+(* Exercise 3.7 - Functor that makes `findMin` operation O(1), 
+   assuming other operations take O(log n) time *)
+module ExplicitMin = 
+  functor(H:HEAP) -> (
+    struct
+      module Elem = H.Elem
+      type heap = E | NE of Elem.t * H.heap
+    
+      let empty = E
+      let isEmpty = function
+        | E -> true
+        | _ -> false
+
+      let insert x = function
+        | E -> NE (x, H.insert x H.empty)
+        | NE (y, h) ->
+           if Elem.compare x y < 0 then NE (x, H.insert x h)
+           else NE (y, H.insert x h)
+                  
+      let merge h1 h2 =
+        match h1, h2 with
+        | E, h -> h
+        | h, E -> h
+        | NE (x, a), NE (y, b) ->
+           if Elem.compare x y < 0 then NE (x, H.merge a b)
+           else NE (y, H.merge a b)
+
+      let findMin = function
+        | E -> raise Empty
+        | NE (x, _) -> x
+
+      let deleteMin = function
+        | E -> raise Empty
+        | NE (_, h) ->
+           let nh = H.deleteMin h in
+           if H.isEmpty nh then E else NE (H.findMin nh, nh)
+    end : (HEAP with module Elem = H.Elem)
+  )
 
 
 module LeftistHeap (Element:ORDERED) : (HEAP with module Elem = Element) =
@@ -81,8 +121,8 @@ module LeftistHeap (Element:ORDERED) : (HEAP with module Elem = Element) =
 
 
 
-(* Exercise 3.4b *)
-module WeightBiasedHeap (Element:ORDERED) : (HEAP with module Elem = Element) =
+(* Exercise 3.4b - leftist heap using the size of a subtree to balance the heap *)
+module WeightBiasedLeftistHeap (Element:ORDERED) : (HEAP with module Elem = Element) =
   struct
     module Elem = Element
           
@@ -121,7 +161,7 @@ module WeightBiasedHeap (Element:ORDERED) : (HEAP with module Elem = Element) =
       | E -> raise Empty
       | T (_, _, a, b) -> merge a b
 
-    (* Exercise 3.4c *)
+    (* Exercise 3.4c - merge in a single, top-down pass *)
     let rec merge2 h1 h2 =
       match h1, h2 with
       | E, h -> h
@@ -135,6 +175,7 @@ module WeightBiasedHeap (Element:ORDERED) : (HEAP with module Elem = Element) =
            if size c >= size d + size h1 then T (nsize, y, c, (merge d h1))
            else T (nsize, y, (merge d h1), c)
   end
+
 
 
 module BinomialHeap (Element:ORDERED) : (HEAP with module Elem = Element) =
@@ -190,7 +231,7 @@ module BinomialHeap (Element:ORDERED) : (HEAP with module Elem = Element) =
       let Node (_, _, ts'), ts = removeMinTree h in
       merge (List.rev ts') ts
 
-    (* Exercise 3.5 *)
+    (* Exercise 3.5 - `findMin` implemented directly *)
     let rec findMin2 = function
       | [] -> raise Empty
       | [Node (_, x, _)] -> x
@@ -200,6 +241,8 @@ module BinomialHeap (Element:ORDERED) : (HEAP with module Elem = Element) =
   end
 
 
+
+(* Exercise 3.6 - Binomial heaps with no ranks explicitly stored at nodes *)
 module BinomialHeap2 (Element:ORDERED) : (HEAP with module Elem = Element) =
   struct
     module Elem = Element

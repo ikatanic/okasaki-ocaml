@@ -27,21 +27,14 @@ module UnbalancedSet (Element:ORDERED) : (SET with type elem = Element.t) =
 
     let empty = E
 
-    let rec member x = function
-      | E -> false
-      | T (a, y, b) ->
-         if Element.compare x y < 0 then member x a
-         else if Element.compare x y > 0 then member x b
-         else true
-                
     (* Exercise 2.2 *)
-    let member2 x s =
+    let member x s =
       let rec go x s last =
         match s, last with
         | E, None -> false
         | E, Some v -> (Element.compare x v) = 0
         | T (a, y, b), last ->
-           if Element.compare x y < 0 then go x a last
+           if (Element.compare x y) < 0 then go x a last
            else go x b (Some y)
       in
       go x s None

@@ -50,7 +50,6 @@ module RedBlackTree2 (Element:ORDERED) : (SET with type elem = Element.t) =
       let T (_, a, y, b) = ins t in
       T (B, a, y, b)
 
-    (* Exercise 2.2 *)
     let member x s =
       let rec go x s last =
         match s, last with

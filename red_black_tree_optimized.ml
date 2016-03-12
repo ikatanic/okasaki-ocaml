@@ -1,5 +1,5 @@
 (* Exercise 2.2 - less calls to compare function in `member`, useful if compare is expensive
-   Exercie 3.10 - faster balancing *)
+   Exercise 3.10 - faster balancing *)
 
 module type SET =
   sig

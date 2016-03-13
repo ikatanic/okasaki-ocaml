@@ -47,3 +47,23 @@ module Stream : STREAM =
           rev a Nil
         )
   end
+
+(* Exercise 4.2 - lazy insertion sort *)
+open Stream
+let rec sort a cmp =
+  lazy (
+      let rec extract_min a acc acc_min =
+        match a with
+        | lazy Nil -> acc, acc_min
+        | lazy (Cons (hd, tl)) ->
+           if cmp hd acc_min < 0 then
+             extract_min tl (lazy (Cons (acc_min, acc))) hd
+           else
+             extract_min tl (lazy (Cons (hd, acc))) acc_min
+      in
+      match a with
+      | lazy Nil -> Nil
+      | lazy (Cons (hd, tl)) ->
+         let rem, min = extract_min tl (lazy Nil) hd in
+         Cons (min, sort rem cmp)
+    )
